@@ -1,0 +1,20 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+_GNU_SOURCE	signal_functions.c	1;"	d	file:
+_GNU_SOURCE	signal_receiver.c	1;"	d	file:
+__SIGNAL_FUNCTIONS_H_	signal_functions.h	2;"	d
+err_sys	signal_receiver.c	/^int err_sys(char *fmt, ...) {$/;"	f
+err_sys	signal_sender.c	/^int err_sys(char *fmt, ...) {$/;"	f
+got_sigint	signal_receiver.c	/^static volatile sig_atomic_t got_sigint = 0;$/;"	v	file:
+handler	signal_receiver.c	/^static void handler(int sig) {$/;"	f	file:
+main	signal_receiver.c	/^int main(int argc, char *argv[]) {$/;"	f
+main	signal_sender.c	/^int main(int argc, char *argv[]) {$/;"	f
+print_pendingSigs	signal_functions.c	/^int  print_pendingSigs(FILE *of, const char *msg){$/;"	f
+print_sigmask	signal_functions.c	/^int  print_sigmask(FILE *of, const char *msg){$/;"	f
+print_sigset	signal_functions.c	/^void print_sigset(FILE *of, const char *prefix, const sigset_t *sigset) {$/;"	f
+print_sigset	signal_receiver.c	/^void print_sigset(FILE *of, const char *prefix, const sigset_t *sigset) {$/;"	f
+sig_cnt	signal_receiver.c	/^static int sig_cnt[NSIG] = {0};$/;"	v	file:

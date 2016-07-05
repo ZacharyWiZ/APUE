@@ -1,0 +1,35 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+__A_P_U_E_H__	APUE.h	2;"	d
+arg_set	pthread_condition_test.c	/^struct arg_set{     \/*two value in one arg*\/$/;"	s	file:
+cleanup	pthread_cleanup.c	/^void cleanup(void *arg) {$/;"	f
+count	pthread_condition_test.c	/^    int count;      \/*number of words*\/$/;"	m	struct:arg_set	file:
+count_words	pthread_condition_test.c	/^void *count_words(void *a) {$/;"	f
+err_sys	APUE.c	/^int err_sys(const char *fmt, ...) {$/;"	f
+file_counter	count_two_files_words.c	/^struct file_counter{$/;"	s	file:
+filename	count_two_files_words.c	/^    char *filename;$/;"	m	struct:file_counter	file:
+flag	pthread_condition_test.c	/^pthread_cond_t  flag    = PTHREAD_COND_INITIALIZER;$/;"	v
+fname	pthread_condition_test.c	/^    char *fname;    \/*file to examine*\/$/;"	m	struct:arg_set	file:
+id	count_two_files_words.c	/^    int id;$/;"	m	struct:file_counter	file:
+intRet	print_thread_exitarg.c	/^int intRet = 55;$/;"	v
+lock	pthread_condition_test.c	/^pthread_mutex_t lock    = PTHREAD_MUTEX_INITIALIZER;$/;"	v
+mailbox	pthread_condition_test.c	/^struct arg_set *mailbox = NULL;$/;"	v	typeref:struct:arg_set
+main	print_id.c	/^int main(void) {$/;"	f
+main	print_thread_exitarg.c	/^int main(void) {$/;"	f
+main	pthread_cleanup.c	/^int main(void) {$/;"	f
+main	pthread_condition_test.c	/^int main(int argc, char *argv[]) {$/;"	f
+main	pthread_mutex_timedlock.c	/^int main(void) {$/;"	f
+ntid	print_id.c	/^pthread_t ntid;$/;"	v
+number	pthread_condition_test.c	/^    int number;$/;"	m	struct:arg_set	file:
+pr_mask	APUE.c	/^void pr_mask(const char *str) {$/;"	f
+print_ids	print_id.c	/^void print_ids(const char *s) {$/;"	f
+thr_fn	print_id.c	/^void *thr_fn(void *arg) {$/;"	f
+thr_fn1	print_thread_exitarg.c	/^void *thr_fn1(void *arg) {$/;"	f
+thr_fn1	pthread_cleanup.c	/^void *thr_fn1(void *arg) {$/;"	f
+thr_fn2	print_thread_exitarg.c	/^void *thr_fn2(void *arg) {$/;"	f
+thr_fn2	pthread_cleanup.c	/^void *thr_fn2(void *arg) {$/;"	f
+word_count	count_two_files_words.c	/^    int word_count;$/;"	m	struct:file_counter	file:

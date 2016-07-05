@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <errno.h>
+
+/*
+ * In this test, we can know that : char [] / char * is diff.
+ * char [] is in the stack
+ * char *  is in the .rodata
+ * it is very import.
+ */
+
+void make_temp(char *template);
+
+int main(void) {
+  char good_template[] = "/tmp/dirXXXXXX";
+  char *bad_template   = "/tmp/dirXXXXXX";
+
+  printf("trying to create first temp file...\n");
+  make_temp(good_template);
+  printf("trying to create second temp file...\n");
+  make_temp(bad_template);
+  ret
+}
+
+void make_temp(char *template) {
+  int fd;
+  struct stat sbuf;
+  
+  if ((fd = mkstemp(template)) < 0)
+    perror("cannot create temp.\n");
+
+  printf("temp name = %s.\n", template);
+  close(fd);
+
+  if (stat(template, &sbuf) < 0) {
+    if (errno == ENOENT)
+      printf("file doesnot exist.\n");
+    else
+      printf("stat failed.\n");
+  }else {
+    printf("file exist.\n");
+    unlink(template);
+  }
+}

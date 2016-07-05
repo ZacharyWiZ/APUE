@@ -1,0 +1,5 @@
+a write to stdout(SYSIO).
+a printf to stdout(STDIO).
+pid = 243668, glo = 7, var = 100.
+a printf to stdout(STDIO).
+pid = 243667, glo = 6, var = 99.

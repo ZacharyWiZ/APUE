@@ -1,0 +1,5 @@
+Complier command: 
+	gcc -fPIC -shared -o APUE.so APUE.c
+
+Dynamic link library usage: 
+	gcc -o a.out program.c ./APUE.so

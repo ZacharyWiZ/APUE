@@ -10,6 +10,8 @@
 
 using namespace std;
 
+const int BUFSZ = 100;
+
 class Err_exit {//打印 并 退出 单例
 public:
     static Err_exit& getInstatce() {
@@ -26,6 +28,11 @@ public:
             cout << err << endl;
             exit(1);
         }
+    }
+
+    void iferr(bool judge, const string &err = string()) const {
+        if (judge)
+            cout << err << endl;
     }
 
 private:
@@ -47,6 +54,7 @@ public:
 
     ~ClientNet() {
         close(sockfd_);
+        cout << "close the sockfd" << endl;
     }
 
     void Disconnect() {
@@ -63,23 +71,25 @@ public:
         memset(&connaddr, 0x00, sizeof(connaddr));
         
         if (inet_pton(AF_INET, 
-             servaddr_.c_str(), (void*)&connaddr.sin_addr.s_addr) != 0)
+             servaddr_.c_str(), (void*)&connaddr.sin_addr.s_addr) != 0) {
+            cout << "inet_pton failed" << endl;
             return false;
-
+        }
         connaddr.sin_port = htons(servport);
         connaddr.sin_family = AF_INET;
         
         if (connect(sockfd_, 
-             (struct sockaddr*)&connaddr, sizeof(connaddr)) != 0)
+             (struct sockaddr*)&connaddr, sizeof(connaddr)) != 0) {
+            cout << "connect failed" << endl;
             return false;
-
+        }
         servport_ = servport;
         servaddr_ = servaddr;
         return true;
     }
 
     //@return : -1:error  ,other is send left byte
-    int Send(const string &msg) const {
+    bool Send(const string &msg) const {
         size_t leftsz = msg.size();
         const char *ptr = &*msg.begin();
         size_t nsended;
@@ -89,18 +99,42 @@ public:
                 if (nsended < 0 && errno == EINTR)
                     nsended = 0;
                 else
-                    return -1;
+                    return false;
             }
             leftsz -= nsended;
             ptr += nsended; 
         }
-        return leftsz;
+        cout << "have send msg:" << msg << endl;
+        return true;
     }
 
-    
+    //TODO
+    bool Recv(string &msg) const {
+        size_t nread;
+        string temp;
+        
+        while (true) {
+            if ((nread = read(sockfd_, buffer_, ::BUFSZ - 1)) < 0){
+                //这里需要在末尾添加一个null
+                if (errno == EINTR)
+                    nread = 0;
+                else
+                    return false;
+            } else if (nread == 0)
+                break;
+            else { //nread > 0
+                buffer_[nread] = '\0';
+                temp += buffer_;
+                cout << "have recv msg:" << buffer_ << endl;
+            }
+            if (nread < BUFSZ-1) break; 
+            //这里不知道怎么退出，如果不主动break，会阻塞在read那里
+        }
+        msg += temp;
+        return true;
+    }
 
     explicit operator bool() const {
-
     //explicit表示编译器不会自动执行这一类型转换
     //不过该规定有一个例外：如果表达式用作条件
     //则编译器会显式的类型转换自动应用于它
@@ -114,9 +148,14 @@ private:
         servaddr_ = string();
         servport_ = 0;
         failed_ = true;
+        memset(buffer_, 0x00, ::BUFSZ);
     }
 
-    bool failed_;    //it means can or cannot to send/write ,just list iostream
+    //接收缓冲区
+    mutable char buffer_[::BUFSZ];
+    mutable bool failed_;
+    //it means can or cannot to send/write ,just list iostream
+
     short servport_;
     string servaddr_;
     int sockfd_;
@@ -125,6 +164,20 @@ private:
 int main() {
     auto &err = Err_exit::getInstatce();
     auto cli = ClientNet();
+    
+    err.iferr(!cli.Conn("0.0.0.0", 99), "conn error");
 
+    string in_msg;
+    while (cin >> in_msg) {
+        if (in_msg == "disconn") {
+            cli.Disconnect();
+            break;
+        }
+        err.iferr(!cli.Send(in_msg), "send error");
+        string msg;
+        err.iferr(!cli.Recv(msg), "recv msg error");
+        cout << msg << endl;
+        cout << "---------------" << endl;
+    }
     return 0;
 }

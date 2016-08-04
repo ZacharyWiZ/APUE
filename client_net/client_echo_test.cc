@@ -138,7 +138,7 @@ public:
     }
 
     //send
-    ClientNet& operator<<(const string &msg) {
+    const ClientNet& operator<<(const string &msg) const {
         if (failed_)
             return *this;
         if (! Send(msg))
@@ -146,7 +146,7 @@ public:
         return *this;
     }
 
-    ClientNet& operator>>(string &msg) {
+    const ClientNet& operator>>(string &msg) const {
         if (failed_)
             return *this;
         if (! Recv(msg))

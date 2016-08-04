@@ -47,9 +47,9 @@ class ClientNet {
 public:
     ClientNet() {
         sockfd_ = ::socket(AF_INET, SOCK_STREAM, 0);
-        Err_exit &err = Err_exit::getInstatce();
-        err.ifexit( sockfd_ == -1);
         clearServ();
+        if (sockfd_ == -1)
+            failed_ = true;
     }
 
     ~ClientNet() {
@@ -94,7 +94,7 @@ public:
     bool Send(const string &msg) const {
 
         size_t leftsz = msg.size();
-        const char *ptr = &*msg.begin();
+        const char *ptr = &*msg.begin(); //顶层const
         size_t nsended;
 
         while (leftsz > 0) {

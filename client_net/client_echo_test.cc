@@ -73,6 +73,7 @@ public:
         if (inet_pton(AF_INET, 
              servaddr_.c_str(), (void*)&connaddr.sin_addr.s_addr) != 0) {
             cout << "inet_pton failed" << endl;
+            failed_ = true;
             return false;
         }
         connaddr.sin_port = htons(servport);
@@ -81,6 +82,7 @@ public:
         if (connect(sockfd_, 
              (struct sockaddr*)&connaddr, sizeof(connaddr)) != 0) {
             cout << "connect failed" << endl;
+            failed_ = true;
             return false;
         }
         servport_ = servport;
@@ -90,6 +92,7 @@ public:
 
     //@return : -1:error  ,other is send left byte
     bool Send(const string &msg) const {
+
         size_t leftsz = msg.size();
         const char *ptr = &*msg.begin();
         size_t nsended;
@@ -134,13 +137,30 @@ public:
         return true;
     }
 
+    //send
+    ClientNet& operator<<(const string &msg) {
+        if (failed_)
+            return *this;
+        if (! Send(msg))
+            failed_ = true;
+        return *this;
+    }
+
+    ClientNet& operator>>(string &msg) {
+        if (failed_)
+            return *this;
+        if (! Recv(msg))
+            failed_ = true;
+        return *this;
+    }
+
     explicit operator bool() const {
     //explicit表示编译器不会自动执行这一类型转换
     //不过该规定有一个例外：如果表达式用作条件
     //则编译器会显式的类型转换自动应用于它
     //while (cin >> a); 类似于这样
 
-        return failed_; 
+        return !failed_; 
     }
 
     const string & getServAddr() const {
@@ -154,7 +174,7 @@ private:
     void clearServ() {
         servaddr_ = string();
         servport_ = 0;
-        failed_ = true;
+        failed_ = false;
         memset(buffer_, 0x00, ::BUFSZ);
     }
 
@@ -172,7 +192,7 @@ int main() {
     auto &err = Err_exit::getInstatce();
     auto cli = ClientNet();
     
-    err.iferr(!cli.Conn("0.0.0.0", 99), "conn error");
+    err.ifexit(!cli.Conn("0.0.0.0", 99), "conn error");
 
     string in_msg;
     while (cin >> in_msg) {
@@ -180,9 +200,20 @@ int main() {
             cli.Disconnect();
             break;
         }
-        err.iferr(!cli.Send(in_msg), "send error");
+        //err.iferr(!cli.Send(in_msg), "send error");
+        if (!(cli << in_msg)) {
+        //如果前面加!需要在表达式加上()
+        //如果是直接的判断条件语句，不需要加上()
+            cout << "send " << in_msg << " failed" << endl;
+            break;
+        }
+
         string msg;
-        err.iferr(!cli.Recv(msg), "recv msg error");
+        //err.iferr(!cli.Recv(msg), "recv msg error");
+        if (!(cli >> msg)) {
+            cout << "recv failed" << endl;
+            break;
+        }
         cout << msg << endl;
         cout << "---------------" << endl;
     }

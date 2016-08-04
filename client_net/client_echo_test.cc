@@ -143,6 +143,13 @@ public:
         return failed_; 
     }
 
+    const string & getServAddr() const {
+        return servaddr_;
+    }
+    const short getServPort() const {
+        return servport_;
+    }
+
 private:
     void clearServ() {
         servaddr_ = string();

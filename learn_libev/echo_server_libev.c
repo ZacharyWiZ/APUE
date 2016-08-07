@@ -63,7 +63,24 @@ int getServSocket() {
 
 void servAcceptCb(EV_P_ ev_io *ac, int revents) {
     int clifd;
-    struct sockaddr cliaddr = {0};
+    struct sockaddr_in cliaddr = {0};
+    socklen_t cliaddr_len = sizeof(struct sockaddr_in);
+    char cliipStr[INET_ADDRSTRLEN] = {0};
+    ev_io *clientev = NULL;
 
-    //clifd = accept(ac->);
+    clifd = accept(ac->fd, 
+        (struct sockaddr*)&cliaddr, &cliaddr_len);
+    if (clifd < 0) {
+        printf("accept failed\n");
+        return ;
+    }
+    if (!inet_ntop(AF_INET, 
+            &(cliaddr.sin_addr), cliipStr, sizeof(cliipStr))) {
+        printf("inet_ntop failed\n");
+        return ;
+    }
+
+    printf("accept client:%s\n", cliipStr);
+    clientev = (ev_io*) malloc(sizeof(ev_io));
+ 
 }

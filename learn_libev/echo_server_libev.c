@@ -4,20 +4,31 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define PORT 99
+#include <ev.h>
 
-#define err_ret(err, strerr) do{ if(err) { printf("%s\n", strerr); }}while(0);
-void err_exit(int err, const char *strerr);
+#define PORT 99
+#define LISTEN_QUESZ 5
+
+void iferr_exit(int err, const char *strerr);
 
 //@return : sockfd which bind
-int bindSocket();
+static int getServSocket();
+
+static void servAcceptCb(EV_P_ ev_io *ac, int revents);
 
 int main() {
-    int sockfd = bindSocket();
+    int sockfd = getServSocket();
+    iferr_exit(0==sockfd, "getServSocket failed");
+
+    iferr_exit(
+        0 != listen(sockfd, LISTEN_QUESZ),
+        "listen failed"
+    );
+    
     return 0;
 }
 
-void err_exit(int err, const char *strerr) {
+void iferr_exit(int err, const char *strerr) {
     //C: not bool, use == is 1:true, 0:false
     if (err) {
         perror(strerr);
@@ -25,21 +36,34 @@ void err_exit(int err, const char *strerr) {
     }
 }
 
-int bindSocket() {
+int getServSocket() {
     int sockfd;
     struct sockaddr_in addr;
     socklen_t addrlen = sizeof(addr);
     memset(&addr, 0x00, addrlen);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    err_exit(sockfd==-1, "socket failed");
+    iferr_exit(sockfd==-1, "socket failed");
 
     addr.sin_family = AF_INET;
     addr.sin_port = htons(PORT); //sin_port 16bit
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    err_exit(
+    //addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if( 1 !=
+            inet_pton(AF_INET, "192.168.112.129", &addr.sin_addr)) {
+        printf("inet_pton failed\n");
+        return 0;
+    }
+        
+    iferr_exit(
         0!=bind(sockfd, (struct sockaddr*)&addr, addrlen),
         "bind failed"
     );
     return sockfd;
+}
+
+void servAcceptCb(EV_P_ ev_io *ac, int revents) {
+    int clifd;
+    struct sockaddr cliaddr = {0};
+
+    //clifd = accept(ac->);
 }

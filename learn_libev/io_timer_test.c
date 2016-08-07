@@ -16,12 +16,12 @@ static void stdin_cb(EV_P_ ev_io *w, int revents) {
 static void timeout_cb(EV_P_ ev_timer *w, int revents) {
     puts("timeout");
     ev_timer_stop(EV_A_ w);
-    //ev_break(EV_A_ EVBREAK_ALL);
+    ev_break(EV_A_ EVBREAK_ALL);
 }
 
 int main() {
     struct ev_loop *loop = EV_DEFAULT;
-    
+
     ev_io_init(&stdin_watcher, stdin_cb, 0, EV_READ);
     ev_io_start(loop, &stdin_watcher);
 
@@ -29,6 +29,6 @@ int main() {
     ev_timer_start(loop, &timeout_watcher);
 
     ev_run(loop, 0);
-    
+    printf("hello world\n"); 
     return 0;
 }

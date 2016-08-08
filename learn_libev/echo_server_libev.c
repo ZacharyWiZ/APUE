@@ -3,11 +3,13 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <unistd.h>
+#include <errno.h>
 #include <ev.h>
 
 #define PORT 99
 #define LISTEN_QUESZ 5
+#define BUFSZ 100
 
 void iferr_exit(int err, const char *strerr);
 
@@ -16,15 +18,23 @@ static int getServSocket();
 
 static void servAcceptCb(EV_P_ ev_io *ac, int revents);
 
+static void servEchoCb(EV_P_ ev_io *ac, int revents);
+
 int main() {
+    struct ev_loop *loop = EV_DEFAULT;
     int sockfd = getServSocket();
     iferr_exit(0==sockfd, "getServSocket failed");
+    ev_io servAcceptWatcher;
 
     iferr_exit(
         0 != listen(sockfd, LISTEN_QUESZ),
         "listen failed"
     );
+
+    ev_io_init(&servAcceptWatcher, servAcceptCb, sockfd, EV_READ);
+    ev_io_start(loop, &servAcceptWatcher);
     
+    ev_run(loop, 0);
     return 0;
 }
 
@@ -66,14 +76,18 @@ void servAcceptCb(EV_P_ ev_io *ac, int revents) {
     struct sockaddr_in cliaddr = {0};
     socklen_t cliaddr_len = sizeof(struct sockaddr_in);
     char cliipStr[INET_ADDRSTRLEN] = {0};
-    ev_io *clientev = NULL;
+    ev_io *clientevWatcher = NULL;
 
+acc_again:
     clifd = accept(ac->fd, 
         (struct sockaddr*)&cliaddr, &cliaddr_len);
-    if (clifd < 0) {
+    if (clifd < 0 && errno == EINTR) 
+        goto acc_again;
+    else if (clifd < 0) {
         printf("accept failed\n");
         return ;
     }
+
     if (!inet_ntop(AF_INET, 
             &(cliaddr.sin_addr), cliipStr, sizeof(cliipStr))) {
         printf("inet_ntop failed\n");
@@ -81,6 +95,42 @@ void servAcceptCb(EV_P_ ev_io *ac, int revents) {
     }
 
     printf("accept client:%s\n", cliipStr);
-    clientev = (ev_io*) malloc(sizeof(ev_io));
- 
+    clientevWatcher = (ev_io*) malloc(sizeof(ev_io));
+    ev_io_init(clientevWatcher, servEchoCb, clifd, EV_READ);
+    ev_io_start(EV_A, clientevWatcher);
+    return ;
+}
+
+void servEchoCb(EV_P_ ev_io *ac, int revents) {
+    int clifd = ac->fd;
+    char buf[BUFSZ] = {0};
+    char *sendptr = 0;
+    int recvCnt = 0;
+    int sendLeft = 0;
+    int sendCnt = 0;
+
+    while (1) {
+        recvCnt = read(clifd, buf, BUFSZ);
+        if (recvCnt < 0 && errno == EINTR)
+            continue;
+        else if (recvCnt < 0) {
+            printf("servEchoCb read failed\n");
+            break;
+        }
+        break;
+    }
+
+    if (recvCnt == 0) {
+        printf("servEchoCb recv FIN\n");
+        close(clifd);
+        return ;
+    }
+    sendLeft = recvCnt;
+    sendptr = buf;
+    while(sendLeft > 0) {
+        sendCnt = write(clifd, buf, sendLeft);
+        sendptr += sendCnt;
+        sendLeft -= sendCnt;        
+    }
+    return ;
 }
